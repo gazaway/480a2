@@ -43,7 +43,6 @@ public class FirstMap {
              return true;
          }
 		
-		@Override
 		public void map(LongWritable key, Text inputBook, Context context)
 				throws IOException, InterruptedException {
 
@@ -84,13 +83,12 @@ public class FirstMap {
 					temp = bookToke.nextToken();
 					temp = temp.toLowerCase();
 					if (temp != "") {
-						left.set(temp + '\t' + date + '\t');
 						if (isInteger(hashedNum)) {
-							int temp = Integer.parseInt(hashedNum);
-							right.set(temp);
+							left.set(Integer.parseInt(hashedNum) + '\t'+ '\t' + temp + '\t');
 						} else {
-							right.set(0);
+							left.set("Book: <unknown...>" + '\t' + '\t' + temp + '\t');
 						}
+						right.set(0);
 						context.write(left, right);
 					}
 				}
@@ -110,8 +108,7 @@ public class FirstMap {
 				sum++;
 			}
 			String leftS = key.toString() + '\t' + sum + '\t';
-			int rightValue = bookSet.size();
-			context.write(new Text(leftS), new IntWritable(rightValue));
+			context.write(new Text(leftS), new IntWritable(0));
 		}
 	}
 
@@ -120,7 +117,8 @@ public class FirstMap {
 		Configuration conf = new Configuration();
 
 		Job job = new Job(conf, "wordcount");
-
+		job.setJarByClass(FirstMap.class);
+		
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
 
