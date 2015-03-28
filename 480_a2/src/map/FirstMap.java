@@ -18,7 +18,7 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
-public class MapR {
+public class FirstMap {
 
 	public static class Map extends
 			Mapper<LongWritable, Text, Text, IntWritable> {
@@ -116,7 +116,7 @@ public class MapR {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void main(String[] args) throws Exception {
+	public void runFirstMap(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 
 		Job job = new Job(conf, "wordcount");
