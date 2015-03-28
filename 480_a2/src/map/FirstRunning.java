@@ -20,7 +20,7 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
-public class FirstMap {
+public class FirstRunning {
 
 	public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
 
@@ -49,7 +49,7 @@ public class FirstMap {
 				cur = stringToke.nextToken();
 				cur = cur.toLowerCase();
 				cur = cur.replaceAll("\\W", "");
-				context.write(new Text(cur + '\t' + file + '\t'), new IntWritable(1));
+				context.write(new Text(cur + "!" + file + '\t'), new IntWritable(1));
 			}
 		}
 	}
@@ -66,11 +66,11 @@ public class FirstMap {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void runFirstMap(String[] args) throws Exception {
+	public void runFirstMap(String arg) throws Exception {
 		Configuration conf = new Configuration();
 
 		Job job = new Job(conf, "480a2");
-		job.setJarByClass(FirstMap.class);
+		job.setJarByClass(FirstRunning.class);
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
@@ -82,7 +82,7 @@ public class FirstMap {
 		job.setInputFormatClass(TextInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
-		FileInputFormat.addInputPath(job, new Path(args[0]));
+		FileInputFormat.addInputPath(job, new Path(arg));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
 		job.waitForCompletion(true);
