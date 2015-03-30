@@ -40,7 +40,7 @@ public class FirstRunning {
 			StringTokenizer stringToke = new StringTokenizer(bookStrings);
 			int cntr = 0;
 			String cur;
-			while (cntr < 2) {
+			while (stringToke.hasMoreTokens()) {
 				cur = stringToke.nextToken();
 				if (cur.equals("***")) {
 					cntr++;
