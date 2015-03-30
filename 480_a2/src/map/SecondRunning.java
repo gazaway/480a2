@@ -1,6 +1,7 @@
 package map;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public class SecondRunning {
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 			int sum = 0;
 			//create hashmaps of the value key pairs
-			Map<String, Integer> temp = new HashMap<String, Integer>();
+			HashMap<String, Integer> temp = new HashMap<String, Integer>();
 			for (Text val : values) {
 				//The unique identifier added in last map/reduce
 				String[] valKey = val.toString().split("!");
@@ -50,7 +51,7 @@ public class SecondRunning {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void runFirstMap(String[] args) throws Exception {
+	public void runSecondMap() throws Exception {
 		Configuration conf = new Configuration();
 
 		Job job = new Job(conf, "480a2");
@@ -66,8 +67,8 @@ public class SecondRunning {
 		job.setInputFormatClass(TextInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
-		FileInputFormat.addInputPath(job, new Path(args[0]));
-		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		FileInputFormat.addInputPath(job, new Path("/temp/"));
+		FileOutputFormat.setOutputPath(job, new Path("/temp2/"));
 
 		job.waitForCompletion(true);
 	}
