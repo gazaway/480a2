@@ -28,7 +28,7 @@ public class SecondRunning {
 			String[] keyVal = value.toString().split("\t");
 			//The unique identifier added in last map/reduce
 			String[] keyFile = keyVal[0].split("@");
-			context.write(new Text(keyFile[1]), new Text(keyFile[0] + "!=!" + keyVal[1]));
+			context.write(new Text(keyFile[1]), new Text(keyFile[0] + "!" + keyVal[1]));
 		}
 	}
 	
@@ -40,9 +40,9 @@ public class SecondRunning {
 			HashMap<String, Integer> temp = new HashMap<String, Integer>();
 			for (Text val : values) {
 				//The unique identifier added in last map/reduce
-				String tempS = val.toString();
-				String[] valKey = tempS.split("!=!");
-				temp.put(valKey[0], Integer.parseInt(valKey[1]));
+				String tempS = val.toString().trim();
+				String[] valKey = tempS.split("\\!");
+				temp.put(valKey[0].trim(), Integer.parseInt(valKey[1].trim()));
 				sum += Integer.parseInt(valKey[1]);
 			}
 			for (String s : temp.keySet()){
