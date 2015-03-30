@@ -23,12 +23,12 @@ public class SecondRunning {
 	public static class Map extends Mapper<LongWritable, Text, Text, Text> {
 	
 		//Restructures the input
-		public void map(LongWritable key, org.w3c.dom.Text value, Context context) throws IOException, InterruptedException {
+		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 		//split the key value pairs
 			String[] keyVal = value.toString().split("\t");
 			//The unique identifier added in last map/reduce
-			String[] keyFile = keyVal[0].split("!");
-			context.write(new Text(keyFile[1]), new Text(keyFile[0] + "!" + keyVal[1]));
+			String[] keyFile = keyVal[0].split("@");
+			context.write(new Text(keyFile[1]), new Text(keyFile[0] + "!=!" + keyVal[1]));
 		}
 	}
 	
@@ -40,12 +40,13 @@ public class SecondRunning {
 			HashMap<String, Integer> temp = new HashMap<String, Integer>();
 			for (Text val : values) {
 				//The unique identifier added in last map/reduce
-				String[] valKey = val.toString().split("!");
-				temp.put(valKey[0], Integer.valueOf(valKey[1]));
+				String tempS = val.toString();
+				String[] valKey = tempS.split("!=!");
+				temp.put(valKey[0], Integer.parseInt(valKey[1]));
 				sum += Integer.parseInt(valKey[1]);
 			}
 			for (String s : temp.keySet()){
-				context.write(new Text(s + "!" + key.toString()), new Text(temp.get(s)+ "@" + sum));
+				context.write(new Text(s + "@" + key.toString()), new Text(temp.get(s)+ "/" + sum));
 			}
 		}
 	}
@@ -62,7 +63,6 @@ public class SecondRunning {
 
 		job.setMapperClass(Map.class);
 		job.setReducerClass(Reduce.class);
-		job.setCombinerClass(Reduce.class);
 
 		job.setInputFormatClass(TextInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);

@@ -40,17 +40,17 @@ public class FirstRunning {
 			StringTokenizer stringToke = new StringTokenizer(bookStrings);
 			int cntr = 0;
 			String cur;
-			while (stringToke.hasMoreTokens()) {
+			/*while (stringToke.hasMoreTokens() && cntr < 2) {
 				cur = stringToke.nextToken();
 				if (cur.equals("***")) {
 					cntr++;
 				}
-			}
+			}*/
 			while (stringToke.hasMoreTokens()) {
 				cur = stringToke.nextToken();
 				cur = cur.toLowerCase();
 				cur = cur.replaceAll("\\W", "");
-				context.write(new Text(cur + "!" + file + '\t'), new IntWritable(1));
+				context.write(new Text(cur + "@" + file + '\t'), new IntWritable(1));
 			}
 		}
 	}
