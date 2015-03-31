@@ -29,8 +29,8 @@ public class ThirdRunning {
 		 */
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 			 String[] firstSplit = value.toString().split("\t");
-		     String[] keySplit = firstSplit[0].split("@");
-		     context.write(new Text(keySplit[0]), new Text(keySplit[1] + "=" + firstSplit[1]));
+		     String[] keySplit = firstSplit[0].split("!");
+		     context.write(new Text(keySplit[0]), new Text(keySplit[1] + "!" + firstSplit[1]));
 		}
 	}
 	
@@ -46,7 +46,7 @@ public class ThirdRunning {
 	        int numOfDocsWithWord = 0;
 	        HashMap<String, String> temp = new HashMap<String, String>();
 	        for (Text val : values) {
-	            String[] split = val.toString().split("=");
+	            String[] split = val.toString().split("!");
 	            numOfDocsWithWord++;
 	            temp.put(split[0], split[1]);
 	        }
@@ -62,7 +62,7 @@ public class ThirdRunning {
 	            String tfIdfString = formatter.format(tfIdf);
 	 
 	            //write the context. Offline portion is done :) YAY
-	            context.write(new Text(key + "@" + document), new Text(tfIdfString));
+	            context.write(new Text(key + "\t" + document), new Text(tfIdfString));
 	            
 	            //TODO NEED TO SETUP OUTPUT TO GIVE DOCUMENT, KEY, IDF FORMAT. You already have everything.
 	            //TODO Some sort of encryption :) Have fun with it!
@@ -101,9 +101,9 @@ public class ThirdRunning {
 	 * ni = # of docs with the word. If # of docs == # docs with the word
 	 * (AKA every doc has the word, I decided to return 1.
 	 */
-	public double getIDF(int _numOfDocs, int _numOfDocsWithWord) {
+	public double getIDF(int numOfDocs, int numOfDocsWithWord) {
 		DecimalFormat formatter = new DecimalFormat("#0.000");
-		double temp = (double)((Math.log((double)_numOfDocs / (double)_numOfDocsWithWord)) / Math.log(2));
+		double temp = (double)((Math.log((double)numOfDocs / (double)numOfDocsWithWord)) / Math.log(2));
 		String idfString = formatter.format(temp);
 		return Double.parseDouble(idfString);
 	}

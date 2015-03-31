@@ -40,7 +40,7 @@ public class FirstRunning {
 			while (match.find()) {
 				String temp = match.group().trim().toLowerCase();
 				//Using as a delimiter. 
-				build.append(temp + "@" + file);
+				build.append(temp + "!" + file);
 				context.write(new Text(build.toString()), new IntWritable(1));
 			}
 		}

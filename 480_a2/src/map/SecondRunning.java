@@ -46,13 +46,13 @@ public class SecondRunning {
 			HashMap<String, Integer> temp = new HashMap<String, Integer>();
 			for (Text val : values) {
 				//The unique identifier added in last map/reduce
-				String[] valKey = val.toString().split("=");
+				String[] valKey = val.toString().split("!");
 				temp.put(valKey[0], Integer.parseInt(valKey[1]));
 				sum += Integer.parseInt(valKey[1]);
 			}
 			//just want to write to context once per word.
 			for (String s : temp.keySet()){
-				context.write(new Text(s + "@" + key.toString()), new Text(temp.get(s)+ "/" + sum));
+				context.write(new Text(s + "!" + key.toString()), new Text(temp.get(s)+ "/" + sum));
 			}
 		}
 	}
