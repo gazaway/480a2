@@ -17,7 +17,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class ThirdRunning {
-	//This was necessary for how I determined the number of docs in the input folder.
+	
+	//This was necessary for how I determined the number of documents in the input folder.
 	int numDocs;
 	
 	public class Map extends Mapper<LongWritable, Text, Text, Text> {
@@ -51,7 +52,6 @@ public class ThirdRunning {
 	        }
 	        for (String document : temp.keySet()) {
 	            String[] numSplit = temp.get(document).split("/");
-	 
 	            //Get the TF
 	            double tf = getTF(numSplit[0], numSplit[1]);	
 	            //Get the idf
@@ -62,9 +62,10 @@ public class ThirdRunning {
 	            String tfIdfString = formatter.format(tfIdf);
 	 
 	            //write the context. Offline portion is done :) YAY
+	            context.write(new Text(key + "@" + document), new Text(tfIdfString));
+	            
 	            //TODO NEED TO SETUP OUTPUT TO GIVE DOCUMENT, KEY, IDF FORMAT. You already have everything.
 	            //TODO Some sort of encryption :) Have fun with it!
-	            context.write(new Text(key + "@" + document), new Text(tfIdfString));
 	        }
 	    }
 	}
@@ -101,15 +102,10 @@ public class ThirdRunning {
 	 * (AKA every doc has the word, I decided to return 1.
 	 */
 	public double getIDF(int _numOfDocs, int _numOfDocsWithWord) {
-		if (_numOfDocs == _numOfDocsWithWord){
-			return (double)_numOfDocs / (double)_numOfDocsWithWord;
-		}
-		else {
-			DecimalFormat formatter = new DecimalFormat("#0.000");
-			double temp = (double)((Math.log((double)_numOfDocs / (double)_numOfDocsWithWord)) / Math.log(2));
-            String idfString = formatter.format(temp);
-			return Double.parseDouble(idfString);
-		}
+		DecimalFormat formatter = new DecimalFormat("#0.000");
+		double temp = (double)((Math.log((double)_numOfDocs / (double)_numOfDocsWithWord)) / Math.log(2));
+		String idfString = formatter.format(temp);
+		return Double.parseDouble(idfString);
 	}
 
 	/*
