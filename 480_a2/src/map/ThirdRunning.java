@@ -117,7 +117,7 @@ public class ThirdRunning {
 	 * MAX(f) = max # of occurences in any document.
 	 */
 	public double getTF(String string, String string2) {
-		return (Double.valueOf(Double.valueOf(string) / Double.valueOf(string2)));
+		return (Double)(Double.valueOf(string) / Double.valueOf(string2));
 	}
 
 	public boolean setNumDocs(int num_Docs) {
