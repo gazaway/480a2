@@ -3,15 +3,14 @@ package map;
 import java.io.IOException;
 import java.util.HashMap;
 
-import map.SecondRunning.Map;
-import map.SecondRunning.Reduce;
-
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.DF;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -19,14 +18,14 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class ThirdRunning {
-	//This was necessary for how I determined the number of docs
-	//in the input folder.
+	//This was necessary for how I determined the number of docs in the input folder.
 	int numDocs;
 	
 	public class Map extends Mapper<LongWritable, Text, Text, Text> {
 		
 		/*
-		 * Third mapping. 
+		 * Third mapping. Passes <word, (file=n/N)> to the reducer. n = number
+		 * of occurrences in document. N = total words.
 		 */
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 			 String[] firstSplit = value.toString().split("\t");
@@ -37,38 +36,44 @@ public class ThirdRunning {
 	
 	public class Reduce extends Reducer<Text, Text, Text, Text> {
 		
+		/*
+		 * Outputs the BCV { word0 = tfidf, word1 = tfdif, ... , wordN = tfidf }
+		 */
 		public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-	        // get the number of documents indirectly from the file-system (stored in the job name on purpose)
-	        int numberOfDocumentsInCorpus = numDocs;
+			//I passed this in earlier.
+	        int numOfDocs = numDocs;
 	        // total frequency of this word
-	        int numberOfDocumentsInCorpusWhereKeyAppears = 0;
-	        HashMap<String, String> tempFrequencies = new HashMap<String, String>();
+	        int numOfDocsWithWord = 0;
+	        HashMap<String, String> temp = new HashMap<String, String>();
 	        for (Text val : values) {
-	            String[] documentAndFrequencies = val.toString().split("=");
-	            numberOfDocumentsInCorpusWhereKeyAppears++;
-	            tempFrequencies.put(documentAndFrequencies[0], documentAndFrequencies[1]);
+	            String[] split = val.toString().split("=");
+	            numOfDocsWithWord++;
+	            temp.put(split[0], split[1]);
 	        }
-	        for (String document : tempFrequencies.keySet()) {
-	            String[] wordFrequenceAndTotalWords = tempFrequencies.get(document).split("/");
+	        for (String document : temp.keySet()) {
+	            String[] numSplit = temp.get(document).split("/");
 	 
 	            //Term frequency is the quocient of the number of terms in document and the total number of terms in doc
-	            double tf = Double.valueOf(Double.valueOf(wordFrequenceAndTotalWords[0])
-	                    / Double.valueOf(wordFrequenceAndTotalWords[1]));
+	            double tf = Double.valueOf(Double.valueOf(numSplit[0])
+	                    / Double.valueOf(numSplit[1]));
 	 
 	            //interse document frequency quocient between the number of docs in corpus and number of docs the term appears
-	            double idf = (double) numberOfDocumentsInCorpus / (double) numberOfDocumentsInCorpusWhereKeyAppears;
+	            double idf = (double) numOfDocs / (double) numOfDocsWithWord;
 	 
 	            //given that log(10) = 0, just consider the term frequency in documents
-	            double tfIdf = numberOfDocumentsInCorpus == numberOfDocumentsInCorpusWhereKeyAppears ?
+	            double tfIdf = numOfDocs == numOfDocsWithWord ?
 	                    tf : tf * Math.log10(idf);
 	 
-	            context.write(new Text(key + "@" + document), new Text("[" + numberOfDocumentsInCorpusWhereKeyAppears + "/"
-	                    + numberOfDocumentsInCorpus + " , " + wordFrequenceAndTotalWords[0] + "/"
-	                    + wordFrequenceAndTotalWords[1] + " , " + DF.format(tfIdf) + "]"));
+	            context.write(new Text(key + "@" + document), new Text("[" + numOfDocsWithWord + "/"
+	                    + numOfDocs + " , " + numSplit[0] + "/"
+	                    + numSplit[1] + " , " + DF.format(tfIdf) + "]"));
 	        }
 	    }
 	}
 	
+	/*
+	 * Generic driver for map/reduce job.
+	 */
 	@SuppressWarnings("deprecation")
 	public void runThirdMap(String arg, int num_Docs) throws Exception {
 		setNumDocs(num_Docs);
@@ -92,7 +97,8 @@ public class ThirdRunning {
 		job.waitForCompletion(true);
 	}
 
-	private void setNumDocs(int num_Docs) {
+	public boolean setNumDocs(int num_Docs) {
 		numDocs = num_Docs;
+		return (numDocs > 0);
 	}
 }
